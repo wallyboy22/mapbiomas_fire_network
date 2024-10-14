@@ -1,3 +1,8 @@
+import gcsfs
+import ipywidgets as widgets  # Library for creating interactive widgets in Jupyter notebooks
+from IPython.display import display, HTML, clear_output  # Utilities for displaying content in Jupyter notebooks
+from ipywidgets import VBox, HBox  # Containers for arranging widgets in vertical or horizontal boxes
+
 # 3.1 Interface para explorar arquivos no Google Cloud Storage (opcional)
 fs = gcsfs.GCSFileSystem(project=bucket_name)
 
