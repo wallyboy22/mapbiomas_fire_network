@@ -1,5 +1,7 @@
 # !git clone https://github.com/wallyboy22/mapbiomas_fire_network.git
 
+script_version = '4_0_2'
+
 # 3.2 Definição de Parâmetros para o Processamento
 country = 'bolivia'  # Opções: ['bolivia', 'colombia', 'chile', 'peru', 'paraguay', 'guyana']
 
