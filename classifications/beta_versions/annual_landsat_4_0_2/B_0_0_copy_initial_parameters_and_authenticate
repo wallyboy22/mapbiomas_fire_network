@@ -1,0 +1,20 @@
+# !git clone https://github.com/wallyboy22/mapbiomas_fire_network.git
+
+# 3.2 Definição de Parâmetros para o Processamento
+country = 'bolivia'  # Opções: ['bolivia', 'colombia', 'chile', 'peru', 'paraguay', 'guyana']
+
+# 2. Autenticação com Google Earth Engine e Google Cloud Storage
+ee_project = f'mapbiomas-{country}'  # Defina o nome do projeto corretamente
+bucket_name = 'mapbiomas-fire'
+
+ee.Authenticate()
+ee.Initialize(project=ee_project)
+
+
+# Inicializar o cliente do Google Cloud Storage e definir o nome do bucket
+client = storage.Client()
+bucket = client.get_bucket(bucket_name)
+
+# Autenticação com Google Cloud (necessária no Colab)
+from google.colab import auth
+auth.authenticate_user()
