@@ -1,0 +1,39 @@
+# Para atualizar os scripts
+
+# 0: Clonar o repositório para o Google
+# !rm -rf /content/mapbiomas_fire_network  # apagar pasta caso exista, cuidado para não perder alterações
+!git clone https://github.com/<seu_usuario>/<nome_do_repositorio>.git  # copiando repositório para classificação em rede das áreas queimadas por regiões dos trópicos.
+
+# 1: Ler o endereço atual no disco
+!pwd
+
+# 2: Entrar no diretório do repositório clonado
+%cd mapbiomas_fire_network
+
+# 3: Verificar o diretório atual novamente
+!pwd
+
+# 4: Autenticação no GitHub (apenas se ainda não estiver configurado)
+!git config --global user.name "<seu_usuario>"
+!git config --global user.email "<seu_email>"
+
+# 5: Verificar o status do repositório para ver se há modificações
+!git status
+
+# 6: Listar arquivos no diretório para confirmar se está na pasta correta
+!ls -la
+
+# 7: Adicionar os arquivos modificados (se houver modificações)
+!git add .
+
+# 8: Fazer o commit das alterações com uma mensagem
+!git commit -m "Atualização do nome da pasta"
+
+# 9: Atualizar a URL remota do Git para usar o token (substitua <seu-token>)
+!git remote set-url origin https://<seu_usuario>:<seu_token>@github.com/<seu_usuario>/<nome_do_repositorio>.git
+
+# 10: Atualizar o repositório no GitHub (envio das mudanças)
+!git push origin main
+
+# Renomear e mover arquivos
+# !mv /content/mapbiomas_fire_network/classifications/beta_versions /content/mapbiomas_fire_network/classifications/beta_classification_algorithms
