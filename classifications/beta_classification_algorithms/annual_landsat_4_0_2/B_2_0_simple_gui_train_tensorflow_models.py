@@ -5,9 +5,6 @@ from IPython.display import display, clear_output
 # Inicializa o sistema de arquivos do Google Cloud Storage
 fs = gcsfs.GCSFileSystem(project=bucket_name)
 
-# Define o caminho base para as pastas dos países
-pasta_base = 'mapbiomas-fire/sudamerica/'
-
 # Função para listar os países (pastas principais)
 def listar_paises(pasta_base):
     pastas = fs.ls(pasta_base)
@@ -23,7 +20,7 @@ def listar_training_samples(pasta_pais):
     except FileNotFoundError:
         return []  # Retorna uma lista vazia se a subpasta não existir
 
-# Função para formatar os arquivos de forma personalizada, semelhante ao exemplo JS
+# Função para formatar os arquivos de forma personalizada
 def formatar_arquivos(arquivos):
     formatted_list = []
     
@@ -36,34 +33,95 @@ def formatar_arquivos(arquivos):
     
     return formatted_list
 
+# Função para coletar amostras selecionadas
+def coletar_amostras_selecionadas():
+    amostras_selecionadas = []
+    for checkbox in checkboxes:
+        if checkbox.value:
+            amostra = checkbox.description.split('_')
+            versao = amostra[1]
+            satelite = amostra[2]
+            regiao = amostra[3]
+            ano = 2023  # Exemplo de ano fixo, pode ajustar conforme necessário
+            amostras_selecionadas.append((versao, satelite, regiao, ano))
+    return amostras_selecionadas
+
+# Função para gerenciar o clique no botão de treinamento
+def treinar_modelos_click(b):
+    amostras_selecionadas = coletar_amostras_selecionadas()
+    simulacao_ativa = simular_checkbox.value
+    if amostras_selecionadas:
+        for amostra in amostras_selecionadas:
+            versao, satelite, regiao, ano = amostra
+            treinar_modelo(versao, satelite, regiao, ano, bucket_name, country, simulacao=simulacao_ativa)
+    else:
+        print("Nenhuma amostra selecionada.")
+
 # Função para exibir o conteúdo de "training_samples" ao selecionar um país
 def ao_selecionar_pais(change):
     clear_output(wait=True)  # Limpar a saída anterior, mas manter o dropdown
-    display(dropdown_paises)  # Reexibir o dropdown para mantê-lo visível
     
     pais_selecionado = change['new']
-    print(f"País selecionado: {pais_selecionado}")
     
     # Listar e exibir os arquivos na pasta "training_samples"
     arquivos_training = listar_training_samples(pais_selecionado)
-    if arquivos_training:
-        print(f"Arquivos na pasta 'training_samples':")
+    num_arquivos = len(arquivos_training)
+    
+    # Exibir o número total de arquivos e país selecionado no topo
+    titulo_pais = widgets.HTML(value=f"<b>País selecionado: {pais_selecionado} ({num_arquivos} arquivos encontrados)</b>")
+    display(titulo_pais)
+    
+    display(dropdown_paises)  # Reexibir o dropdown
+    
+    # Painel com rolagem para os arquivos
+    painel_arquivos = widgets.Output(layout={'border': '1px solid black', 'height': '150px', 'overflow_y': 'scroll', 'margin': '10px 0'})
+    
+    with painel_arquivos:
         for arquivo in arquivos_training:
             print(f'  - {arquivo}')
-        
+    
+    display(painel_arquivos)  # Exibe o painel com rolagem
+    
+    if arquivos_training:
         # Formatar os arquivos
         arquivos_formatados = formatar_arquivos(arquivos_training)
         
-        print("\nArquivos formatados:")
+        # Título das amostras por sensor, região e versão
+        num_amostras = len(arquivos_formatados)
+        titulo_amostras = widgets.HTML(value=f"<b>Amostras por sensor, região e versão disponíveis para executar o treinamento ({num_amostras} amostras):</b>")
+        display(titulo_amostras)
+        
+        # Exibir checkboxes para cada arquivo formatado
+        global checkboxes  # Para acessar na coleta de amostras
+        checkboxes = []
         for arquivo in arquivos_formatados:
-            print(f'  - {arquivo}')
+            checkbox = widgets.Checkbox(value=False, description=arquivo, layout=widgets.Layout(width='auto'))
+            checkboxes.append(checkbox)
+        
+        # Painel para organizar as checkboxes em colunas verticais, sem limitar a altura
+        painel_checkboxes = widgets.VBox(checkboxes, layout=widgets.Layout(border='1px solid black', padding='10px', margin='10px 0'))
+        display(painel_checkboxes)
+    
+        # Checkbox para simulação e botão de treinamento
+        global simular_checkbox
+        simular_checkbox = widgets.Checkbox(value=False, description="Simular processamento!", indent=False)
+        botao_treinar = widgets.Button(description="Treinar Modelos", button_style='success', layout=widgets.Layout(width='200px'))  # Botão verde
+        
+        # Vincular o botão à função de clique
+        botao_treinar.on_click(treinar_modelos_click)
+        
+        # Layout do rodapé com o checkbox e o botão
+        rodape_layout = widgets.HBox([simular_checkbox, botao_treinar], layout=widgets.Layout(justify_content='flex-start', margin='20px 0'))
+        display(rodape_layout)
+    
     else:
-        print("Nenhum arquivo encontrado na pasta 'training_samples'.")
+        mensagem = widgets.HTML(value="<b style='color: red;'>Nenhum arquivo encontrado na pasta 'training_samples'.</b>")
+        display(mensagem)
 
 # Widget de dropdown para selecionar o país
 dropdown_paises = widgets.Dropdown(
     options=listar_paises(pasta_base),
-    description='Países:',
+    description='<b>Países:</b>',
     disabled=False
 )
 
