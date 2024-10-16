@@ -46,14 +46,23 @@ def coletar_amostras_selecionadas():
             amostras_selecionadas.append((versao, satelite, regiao, ano))
     return amostras_selecionadas
 
-# Função para gerenciar o clique no botão de treinamento
-def treinar_modelos_click(b):
+# Função para gerenciar o clique no botão de simulação
+def simular_processamento_click(b):
     amostras_selecionadas = coletar_amostras_selecionadas()
-    simulacao_ativa = simular_checkbox.value
     if amostras_selecionadas:
         for amostra in amostras_selecionadas:
             versao, satelite, regiao, ano = amostra
-            treinar_modelo(versao, satelite, regiao, ano, bucket_name, country, simulacao=simulacao_ativa)
+            treinar_modelo(versao, satelite, regiao, ano, bucket_name, country, simulacao=True)
+    else:
+        print("Nenhuma amostra selecionada.")
+
+# Função para gerenciar o clique no botão de treinamento
+def treinar_modelos_click(b):
+    amostras_selecionadas = coletar_amostras_selecionadas()
+    if amostras_selecionadas:
+        for amostra in amostras_selecionadas:
+            versao, satelite, regiao, ano = amostra
+            treinar_modelo(versao, satelite, regiao, ano, bucket_name, country, simulacao=False)
     else:
         print("Nenhuma amostra selecionada.")
 
@@ -102,16 +111,16 @@ def ao_selecionar_pais(change):
         painel_checkboxes = widgets.VBox(checkboxes, layout=widgets.Layout(border='1px solid black', padding='10px', margin='10px 0'))
         display(painel_checkboxes)
     
-        # Checkbox para simulação e botão de treinamento
-        global simular_checkbox
-        simular_checkbox = widgets.Checkbox(value=False, description="Simular processamento!", indent=False)
+        # Botões para simulação e treinamento
+        botao_simular = widgets.Button(description="Simular Processamento!", button_style='warning', layout=widgets.Layout(width='200px'))  # Botão amarelo
         botao_treinar = widgets.Button(description="Treinar Modelos", button_style='success', layout=widgets.Layout(width='200px'))  # Botão verde
         
-        # Vincular o botão à função de clique
+        # Vincular os botões às funções de clique
+        botao_simular.on_click(simular_processamento_click)
         botao_treinar.on_click(treinar_modelos_click)
         
-        # Layout do rodapé com o checkbox e o botão
-        rodape_layout = widgets.HBox([simular_checkbox, botao_treinar], layout=widgets.Layout(justify_content='flex-start', margin='20px 0'))
+        # Layout do rodapé com os dois botões, encostados
+        rodape_layout = widgets.HBox([botao_simular, botao_treinar], layout=widgets.Layout(justify_content='flex-start', margin='20px 0'))
         display(rodape_layout)
     
     else:
